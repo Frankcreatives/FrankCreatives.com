@@ -4,6 +4,7 @@ import Projects from './pages/Projects';
 import Feedback from './pages/Feedback';
 import AdminDashboard from './pages/AdminDashboard';
 import Polls from './pages/Polls';
+import ResetPassword from './pages/ResetPassword';
 import { Layout } from './components/Layout';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
@@ -17,6 +18,7 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<Login />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         
         <Route element={<ProtectedRoute />}>
           <Route element={<Layout />}>

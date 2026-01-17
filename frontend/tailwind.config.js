@@ -10,7 +10,7 @@ export default {
       colors: {
         'brand': {
           green: '#5BC256',
-          cream: '#F9F7F2',
+          cream: '#d1cdc2ff',
           black: '#111827',
         },
         primary: {
