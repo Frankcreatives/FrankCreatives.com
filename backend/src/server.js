@@ -22,6 +22,11 @@ app.get('/', (req, res) => {
   res.send('Antigravity Community API is running');
 });
 
+// Dedicated Keep-Alive endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 // Global Error Handler
 app.use((err, req, res, next) => {
   console.error(err.stack);

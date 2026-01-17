@@ -13,49 +13,36 @@ const pollSchema = z.object({
 // GET /api/polls - List all active polls with options and vote counts
 router.get('/', async (req, res) => {
   try {
-    // 1. Get Active Polls
-    const { data: polls, error: pollError } = await supabase
+    const { data: polls, error } = await supabase
       .from('polls')
-      .select('*')
+      .select(`
+        *,
+        options:poll_options(*),
+        votes:poll_votes(option_id)
+      `)
       .eq('is_active', true)
       .order('created_at', { ascending: false });
 
-    if (pollError) throw pollError;
+    if (error) throw error;
 
-    // 2. Fetch Options & Votes for each poll
-    const pollsWithDetails = await Promise.all(polls.map(async (poll) => {
-      // Get Options
-      const { data: options, error: optError } = await supabase
-        .from('poll_options')
-        .select('*')
-        .eq('poll_id', poll.id);
-      
-      if (optError) throw optError;
-
-      // Get Vote Counts
-      const { data: votes, error: voteError } = await supabase
-        .from('poll_votes')
-        .select('option_id')
-        .eq('poll_id', poll.id);
-
-      if (voteError) throw voteError;
-
-      // Calculate counts
-      const optionsWithCounts = options.map(opt => ({
+    // Format the data to match the previous structure
+    const formattedPolls = polls.map(poll => {
+      const totalVotes = poll.votes.length;
+      const optionsWithCounts = poll.options.map(opt => ({
         ...opt,
-        votes: votes.filter(v => v.option_id === opt.id).length
+        votes: poll.votes.filter(v => v.option_id === opt.id).length
       }));
 
-      const totalVotes = votes.length;
-
+      // Remove the raw votes array from the response to keep it clean
+      const { votes, ...pollData } = poll;
       return {
-        ...poll,
+        ...pollData,
         options: optionsWithCounts,
         totalVotes
       };
-    }));
+    });
 
-    res.json(pollsWithDetails);
+    res.json(formattedPolls);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
